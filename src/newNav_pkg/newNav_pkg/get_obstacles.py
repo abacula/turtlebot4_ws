@@ -60,8 +60,8 @@ class lab2(Node):
                     theta = (-self.PI/2) * ratio - (self.PI/2)
                 
                 if (scan_val > min_range and scan_val < self.detect_distance):
-                    obs_x = scan_val*math.sin(theta)
-                    obs_y = scan_val*math.cos(theta)
+                    obs_x = scan_val*math.cos(theta)
+                    obs_y = scan_val*math.sin(theta)
                     obs_x_list.append(obs_x)
                     obs_y_list.append(obs_y)
 
