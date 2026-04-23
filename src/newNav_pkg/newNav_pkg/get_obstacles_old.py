@@ -24,6 +24,8 @@ class lab2(Node):
 
         self.obs_pub = self.create_publisher(ObsList, '/obs', 10)
 
+        self.stop_pub = self.create_publisher(Bool, '/stop', 10)
+
         self.scan_sub = self.create_subscription(LaserScan, '/robot4/scan', self.scan_callback, 10)
 
 
@@ -32,6 +34,8 @@ class lab2(Node):
         min_range = msg.range_min 
         max_range = msg.range_max
         front_scans = msg.ranges[200:340]
+
+        self.too_close(front_scans, min_range, max_range)
         
         n = len(msg.ranges)
         self.get_logger().info(str(n)) 
@@ -60,10 +64,9 @@ class lab2(Node):
                     obs_y = scan_val*math.sin(theta)
                     obs_x_list.append(obs_x)
                     obs_y_list.append(obs_y)
-                    f.write(str(round(obs_x,3)) + "," + str(round(obs_y,3)) + "\n")
 
                 i += 1
-                
+                f.write(str(round(obs_x,3)) + "," + str(round(obs_y,3)) + "\n")
 
         # Publish obstacle locations
         obs = ObsList()
@@ -71,6 +74,19 @@ class lab2(Node):
         obs.y_list = obs_y_list
         self.obs_pub.publish(obs)
 
+        # Publish if obstacle in close range
+        stop = Bool()
+        stop.data = self.obstacle_detected
+        self.stop_pub.publish(stop)
+                    
+
+    def too_close(self, ranges, min, max):
+        # Stop if too close to obstacle
+        for scan_val in ranges:
+            if (scan_val > min and scan_val < max):
+                if scan_val < self.obstacle_distance:
+                    self.get_logger().info("obstacle")
+                    self.obstacle_detected = True
 
 def main(args=None):
     rclpy.init(args=args)
