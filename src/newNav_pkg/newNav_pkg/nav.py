@@ -35,6 +35,10 @@ class NavNode(Node):
         self.y = 0
         self.ang = 0
 
+        self.x_offset = 0 
+        self.y_offset = 0
+        self.got_offset = False
+
         # Size of the robot
         self.robot_radius = 0.3
 
@@ -68,15 +72,26 @@ class NavNode(Node):
 
     # Callback for pos sub
     def callback_pos(self, msg):
-        self.x = msg.pose.pose.position.x
+        self.x = msg.pose.pose.position.x * -1
         self.y = msg.pose.pose.position.y
         quaternion = msg.pose.pose.orientation
 
+        if self.got_offset is False:
+            self.x_offset = -self.x
+            self.y_offset = -self.y
+            self.got_offset = True
+        else: 
+            self.x += self.x_offset
+            self.y += self.y_offset
+
         # Angle converted from quaternion to euler
         (_,_,self.ang) = euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])   
+        self.ang +=  self.PI 
+        if self.ang > self.PI:
+            self.ang += -2*self.PI
 
         test = String()
-        test.data = "Current position x: " + str(round(self.x,2)) + " y: " + str(round(self.x,2)) + " ang: " + str(round(self.ang,2)) + "\n"
+        test.data = "Current position x: " + str(round(self.x,2)) + " y: " + str(round(self.y,2)) + " ang: " + str(round(self.ang,2)) + "\n"
         self.loc_pub.publish(test)
 
     # Callback for obstacle locations
@@ -103,12 +118,6 @@ class NavNode(Node):
         test = String()
         test.data = "closest obs: " + str(closest_obs[0]) + " y: " + str(closest_obs[1]) + "\n"
         self.obstacles_pub.publish(test)
-           
-        # if (goal[0] > self.max_x or goal[1] > self.max_y):
-        #     self.get_logger().info("Rejected because out of bounds")
-        #     self.get_logger().info("Bounds are x: " + str(round(self.origin_x,2)) + " to " + str(round(self.max_x,2)))
-        #     self.get_logger().info("Bounds are y: " + str(round(self.origin_y,2)) + " to " + str(round(self.max_y,2)))
-        #     return GoalResponse.REJECT
 
         if min_distance < self.robot_radius:
             self.get_logger().info("Rejected, too close to obstacle at x: " + str(closest_obs[0]) + " y: " + str(closest_obs[1]))
@@ -119,8 +128,8 @@ class NavNode(Node):
     
     def execute_callback(self, goal_handle):
         # Make goal relative to robot current pose
-        goal_x = goal_handle.request.goal_x # + self.x
-        goal_y = goal_handle.request.goal_y # + self.y
+        goal_x = goal_handle.request.goal_x 
+        goal_y = goal_handle.request.goal_y 
         goal_theta = goal_handle.request.goal_theta
 
         result = RobotGoal.Result()
@@ -189,6 +198,13 @@ class NavNode(Node):
             # Publish velocity
             self.velocity_pub.publish(vel)
 
+            # Publish feedback
+            feedback.current_x = float(round(self.x,2))
+            feedback.current_y = float(round(self.y,2))
+            feedback.current_theta = float(round(self.ang,2))
+            feedback.distance_from_goal = float(round(err_pos,2))
+            goal_handle.publish_feedback(feedback)
+
             # Replace prev err
             err_pos_prev = err_pos
             err_ang_prev = err_ang
@@ -197,12 +213,7 @@ class NavNode(Node):
             err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
             iteration += 1
 
-            # Publish feedback
-            feedback.current_x = float(round(self.x,2))
-            feedback.current_y = float(round(self.y,2))
-            feedback.current_theta = float(round(self.ang,2))
-            feedback.distance_from_goal = float(round(err_pos,2))
-            goal_handle.publish_feedback(feedback)
+          
 
         # Calc dif between current angle and goal angle
         err_ang = abs(self.ang - goal_theta)

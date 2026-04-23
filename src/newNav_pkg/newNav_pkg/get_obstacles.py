@@ -31,8 +31,7 @@ class getObs(Node):
         max_range = msg.range_max
         front_scans = msg.ranges[200:340]
         
-        n = len(msg.ranges)
-        self.get_logger().info(str(n)) 
+        n = len(msg.ranges) 
         obs_x_list = []
         obs_y_list = []
 
