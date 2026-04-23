@@ -12,7 +12,7 @@ class lab2(Node):
         super().__init__('lab2')
 
         self.obstacle_detected = False
-        self.obstacle_distance = 0.6
+        self.obstacle_distance = 0.5
 
         self.vel_sub = self.create_subscription(Twist, '/robot4/cmd_vel_unfiltered', self.callback_vel, 10)
         self.vel_pub = self.create_publisher(Twist, 'robot4/cmd_vel_unstamped', 10)
@@ -38,6 +38,7 @@ class lab2(Node):
         self.vel_pub.publish(new_vel)
 
     def scan_callback(self,msg):
+        self.obstacle_detected = False
         min_range = msg.range_min 
         max_range = msg.range_max
         ranges = msg.ranges[200:340]
@@ -46,10 +47,8 @@ class lab2(Node):
                 if range < self.obstacle_distance:
                     self.get_logger().info("obstacle")
                     self.obstacle_detected = True
-                    return 
+                    
 
-        self.obstacle_detected = False
-        return 
 
 def main(args=None):
     rclpy.init(args=args)

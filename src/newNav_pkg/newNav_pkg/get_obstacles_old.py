@@ -64,9 +64,10 @@ class lab2(Node):
                     obs_y = scan_val*math.sin(theta)
                     obs_x_list.append(obs_x)
                     obs_y_list.append(obs_y)
+                    f.write(str(round(obs_x,3)) + "," + str(round(obs_y,3)) + "\n")
 
                 i += 1
-                f.write(str(round(obs_x,3)) + "," + str(round(obs_y,3)) + "\n")
+                
 
         # Publish obstacle locations
         obs = ObsList()

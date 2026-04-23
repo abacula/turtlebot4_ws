@@ -16,7 +16,6 @@ class getObs(Node):
         # Change to have your node name
         super().__init__('get_obs')
 
-       
         self.detect_distance = 5.0
 
         self.PI = 3.14159265358979323846
@@ -38,25 +37,25 @@ class getObs(Node):
         obs_y_list = []
 
         i = 0
-            while i<n:
-                scan_val = msg.ranges[i]
+        while i<n:
+            scan_val = msg.ranges[i]
 
-                if i < n/4:
-                    ratio = ((n/4) - i) / (n/4)
-                    theta = (-self.PI/2) * ratio
-                elif i < (3*n/4):
-                    ratio = (i - (n/4)) / (n/2)
-                    theta = self.PI * ratio
-                else:
-                    ratio = (n - i) / (n/4)
-                    theta = (-self.PI/2) * ratio - (self.PI/2)
-                
-                if (scan_val > min_range and scan_val < self.detect_distance):
-                    obs_x = scan_val*math.cos(theta)
-                    obs_y = scan_val*math.sin(theta)
-                    obs_x_list.append(obs_x)
-                    obs_y_list.append(obs_y)
-                i += 1
+            if i < n/4:
+                ratio = ((n/4) - i) / (n/4)
+                theta = (-self.PI/2) * ratio
+            elif i < (3*n/4):
+                ratio = (i - (n/4)) / (n/2)
+                theta = self.PI * ratio
+            else:
+                ratio = (n - i) / (n/4)
+                theta = (-self.PI/2) * ratio - (self.PI/2)
+            
+            if (scan_val > min_range and scan_val < self.detect_distance):
+                obs_x = scan_val*math.cos(theta)
+                obs_y = scan_val*math.sin(theta)
+                obs_x_list.append(obs_x)
+                obs_y_list.append(obs_y)
+            i += 1
                 
 
         # Publish obstacle locations
