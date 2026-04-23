@@ -1,0 +1,10 @@
+<launch>
+ <include file="$(find-pkg-share turtlebot4_navigation)/launch/localization.launch.py" >
+    <arg name="namespace" value="/robot4" />
+    <arg name="map" value="morken_212.yaml" />
+ </include>
+
+  <include file="$(find-pkg-share turtlebot4_navigation)/launch/nav2.launch.py" >
+    <arg name="namespace" value="/robot4" />
+ </include>
+</launch>
