@@ -37,6 +37,7 @@ class NavNode(Node):
 
         self.x_offset = 0 
         self.y_offset = 0
+        self.ang_offset = 0
         self.got_offset = False
 
         # Size of the robot
@@ -72,23 +73,28 @@ class NavNode(Node):
 
     # Callback for pos sub
     def callback_pos(self, msg):
-        self.x = msg.pose.pose.position.x * -1
-        self.y = msg.pose.pose.position.y
+        x = msg.pose.pose.position.x * -1
+        y = msg.pose.pose.position.y
         quaternion = msg.pose.pose.orientation
-
+         # Angle converted from quaternion to euler
+        (_,_,ang) = euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])   
+        
         if self.got_offset is False:
-            self.x_offset = -self.x
-            self.y_offset = -self.y
+            # Point where node starts is 0, 0, rotation 0
+            self.x_offset = -x
+            self.y_offset = -y
+            self.ang_offset = -ang
             self.got_offset = True
-        else: 
-            self.x += self.x_offset
-            self.y += self.y_offset
+         
+        self.x = x + self.x_offset
+        self.y = y + self.y_offset
 
-        # Angle converted from quaternion to euler
-        (_,_,self.ang) = euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])   
-        self.ang +=  self.PI 
-        if self.ang > self.PI:
+        ang += self.ang_offset
+        ang +=  self.PI 
+        if ang > self.PI:
             self.ang += -2*self.PI
+        else:
+            self.ang = ang
 
         test = String()
         test.data = "Current position x: " + str(round(self.x,2)) + " y: " + str(round(self.y,2)) + " ang: " + str(round(self.ang,2)) + "\n"
@@ -158,7 +164,7 @@ class NavNode(Node):
         iteration = 0
 
         # While not close enough
-        while abs(err_pos) > self.pos_threshold:
+        while err_pos > self.pos_threshold:
 
             if iteration > self.max_iteration:
                 # Set result success to true
@@ -178,9 +184,11 @@ class NavNode(Node):
             
             # Calc desired angle
             desired_angle = math.atan2(goal_y - self.y, goal_x - self.x)
-
+        
             # Calc ang error
             err_ang =  desired_angle - self.ang
+
+            self.get_logger().info("dAng: " + str(round(desired_angle,2)) + ", err: " + str(round(self.ang,2)))
 
             err_ang_sum += err_ang     
             err_pos_sum += err_pos
@@ -193,9 +201,10 @@ class NavNode(Node):
 
             vel.linear.x = vel_lin
             vel.angular.z = vel_ang
-
-            
+  
             # Publish velocity
+        # Calc dif between current angle and goal angle
+
             self.velocity_pub.publish(vel)
 
             # Publish feedback
@@ -213,13 +222,11 @@ class NavNode(Node):
             err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
             iteration += 1
 
-          
-
         # Calc dif between current angle and goal angle
-        err_ang = abs(self.ang - goal_theta)
+        err_ang = goal_theta - self.ang
 
         # While not close enough
-        while err_ang > self.ang_threshold:
+        while abs(err_ang) > self.ang_threshold:
             vel = Twist()
             vel.linear.x = 0.0
             # Rotate
@@ -228,7 +235,7 @@ class NavNode(Node):
             self.velocity_pub.publish(vel)
 
             # Calc dif between current angle and goal angle
-            err_ang = abs(self.ang - goal_theta)
+            err_ang = goal_theta - self.ang
 
             # Publish feedback
             feedback.current_x = float(round(self.x,2))
