@@ -10,14 +10,13 @@ from rclpy.qos import qos_profile_sensor_data
 import math
 
 # Decide your node class name
-class lab2(Node):
+class getObs(Node):
     def __init__(self):
 
         # Change to have your node name
         super().__init__('get_obs')
 
-        self.obstacle_detected = False
-        self.obstacle_distance = 0.4
+       
         self.detect_distance = 5.0
 
         self.PI = 3.14159265358979323846
@@ -39,9 +38,6 @@ class lab2(Node):
         obs_y_list = []
 
         i = 0
-
-        with open("obs_locs.csv", "w") as f:
-
             while i<n:
                 scan_val = msg.ranges[i]
 
@@ -60,8 +56,6 @@ class lab2(Node):
                     obs_y = scan_val*math.sin(theta)
                     obs_x_list.append(obs_x)
                     obs_y_list.append(obs_y)
-                    f.write(str(round(obs_x,3)) + "," + str(round(obs_y,3)) + "\n")
-
                 i += 1
                 
 
@@ -76,7 +70,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     # Change to be your node class name
-    node = lab2()
+    node = getObs()
 
     rclpy.spin(node)
     node.destroy_node()
