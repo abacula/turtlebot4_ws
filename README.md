@@ -13,3 +13,6 @@ Terminal 3: ros2 run newNav_pkg go_to_goal
 
 Terminal 4: ros2 run newNav_pkg goal_client
  - sends robot goal
+
+Attempted frames
+<img width="2920" height="3026" alt="robot_frames" src="https://github.com/user-attachments/assets/812c6c94-87fb-486c-a0c8-cf7f9a74bbc4" />
