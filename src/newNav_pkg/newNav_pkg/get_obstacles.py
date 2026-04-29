@@ -36,6 +36,7 @@ class getObs(Node):
         obs_y_list = []
 
         i = 0
+        
         while i<n:
             scan_val = msg.ranges[i]
 
