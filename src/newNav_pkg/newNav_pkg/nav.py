@@ -57,6 +57,8 @@ class NavNode(Node):
         # Store our obstacle locations relative to world frame (world 0,0)
         self.obs_space_world_frame = []
 
+        # Store distances from obstacles to robot
+        self.obs_dist = []
 
         # Subscribe to the odometry (robot location?)
         self.pos_subscriber = self.create_subscription(Odometry, '/robot4/odom', self.callback_pos, 10)
@@ -114,6 +116,7 @@ class NavNode(Node):
     def callback_obs(self,msg):
         self.obs_space_rob_frame = []
         self.obs_space_world_frame = []
+        self.obs_dist = msg.d_list
         lim  = len(msg.x_list)
         i = 0
         while i < lim:
@@ -124,6 +127,7 @@ class NavNode(Node):
             x_world = x_rob*math.cos(self.ang) - y_rob*math.sin(self.ang) + self.x
             y_world = x_rob*math.sin(self.ang) + y_rob*math.cos(self.ang) + self.y
             self.obs_space_world_frame.append([x_world,y_world])
+
             
             i+=1
 

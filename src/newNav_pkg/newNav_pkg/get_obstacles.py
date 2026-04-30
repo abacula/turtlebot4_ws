@@ -34,6 +34,7 @@ class getObs(Node):
         n = len(msg.ranges) 
         obs_x_list = []
         obs_y_list = []
+        obs_d_list = []
 
         i = 0
         
@@ -55,6 +56,7 @@ class getObs(Node):
                 obs_y = scan_val*math.sin(theta)
                 obs_x_list.append(obs_x)
                 obs_y_list.append(obs_y)
+                obs_d_list.append(scan_val)
             i += 1
                 
 
@@ -62,6 +64,7 @@ class getObs(Node):
         obs = ObsList()
         obs.x_list = obs_x_list
         obs.y_list = obs_y_list
+        obs.d_list = obs_d_list
         self.obs_pub.publish(obs)
 
 
