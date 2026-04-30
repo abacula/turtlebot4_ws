@@ -129,7 +129,6 @@ class NavNode(Node):
         #         f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "\n")
 
     
-
     # Goal callback
     def goal_callback(self, goal_request):
         goal = [goal_request.goal_x,goal_request.goal_y]
@@ -179,8 +178,8 @@ class NavNode(Node):
         kil = 0
 
         kpa = 0.1
-        kda = 0.02
-        kia = 0
+        kda = 0.06
+        kia = 0.04
 
         iteration = 0
 
@@ -216,7 +215,11 @@ class NavNode(Node):
 
             # If not close enough to desired angle
             if abs(err_ang) > self.ang_threshold:
-                vel_ang = kpa*err_ang + kda*(err_ang - err_ang_prev) + kia*err_ang_sum
+                # If at the -pi to pi boundary just keep prior vel until past that point
+                if abs(err_ang) > self.PI:
+                    vel_ang = vel_ang_prev
+                else:
+                    vel_ang = kpa*err_ang + kda*(err_ang - err_ang_prev) + kia*err_ang_sum
             else:
                 vel_lin = kpl*err_pos + kdl*(err_pos - err_pos_prev) + kil*err_pos_sum
 
@@ -238,6 +241,7 @@ class NavNode(Node):
             # Replace prev err
             err_pos_prev = err_pos
             err_ang_prev = err_ang
+            vel_ang_prev = vel_ang
 
             # Calc new errs
             err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
