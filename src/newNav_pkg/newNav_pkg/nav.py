@@ -103,6 +103,9 @@ class NavNode(Node):
         self.x = x*math.cos(self.ang_offset) - y*math.sin(self.ang_offset) + self.x_offset
         self.y = x*math.sin(self.ang_offset) + y*math.cos(self.ang_offset) + self.y_offset
 
+        with open("/home/alexandra.bacula/turtlebot4_ws/loc.csv", "w") as f:
+            f.write(str(round(self.x,3)) + "," + str(round(self.y,3)) + "\n")
+
         test = String()
         test.data = "Current position x: " + str(round(self.x,2)) + " y: " + str(round(self.y,2)) + " ang: " + str(round(self.ang,4)) + "\n"
         self.loc_pub.publish(test)
@@ -118,15 +121,15 @@ class NavNode(Node):
             y_rob = msg.y_list[i]
             self.obs_space_rob_frame.append([x_rob,y_rob])
 
-            x_world = x_rob*math.cos(self.ang_offset) - y_rob*math.sin(self.ang_offset) + self.x
-            y_world = x_rob*math.sin(self.ang_offset) + y_rob*math.cos(self.ang_offset) + self.y
+            x_world = x_rob*math.cos(self.ang) - y_rob*math.sin(self.ang) + self.x
+            y_world = x_rob*math.sin(self.ang) + y_rob*math.cos(self.ang) + self.y
             self.obs_space_world_frame.append([x_world,y_world])
             
             i+=1
 
-        # with open("/home/alexandra.bacula/turtlebot4_ws/obs_loc.csv", "w") as f:
-        #     for obs in self.obs_space_world_frame:
-        #         f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "\n")
+        with open("/home/alexandra.bacula/turtlebot4_ws/obs_loc.csv", "w") as f:
+            for obs in self.obs_space_world_frame:
+                f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "\n")
 
     
     # Goal callback
@@ -178,8 +181,8 @@ class NavNode(Node):
         kil = 0
 
         kpa = 0.1
-        kda = 0.06
-        kia = 0.04
+        kda = 0.02
+        kia = 0.0
 
         iteration = 0
 
