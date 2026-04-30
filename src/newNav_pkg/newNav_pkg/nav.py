@@ -118,15 +118,15 @@ class NavNode(Node):
             y_rob = msg.y_list[i]
             self.obs_space_rob_frame.append([x_rob,y_rob])
 
-            x_world = x_rob*math.cos(self.ang_offset) - y_rob*math.sin(self.ang_offset) + self.x_offset
-            y_world = x_rob*math.sin(self.ang_offset) + y_rob*math.cos(self.ang_offset) + self.y_offset
+            x_world = x_rob*math.cos(self.ang_offset) - y_rob*math.sin(self.ang_offset) + self.x
+            y_world = x_rob*math.sin(self.ang_offset) + y_rob*math.cos(self.ang_offset) + self.y
             self.obs_space_world_frame.append([x_world,y_world])
             
             i+=1
 
-        with open("/home/alexandra.bacula/turtlebot4_ws/obs_loc.csv", "w") as f:
-            for obs in self.obs_space_world_frame:
-                f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "\n")
+        # with open("/home/alexandra.bacula/turtlebot4_ws/obs_loc.csv", "w") as f:
+        #     for obs in self.obs_space_world_frame:
+        #         f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "\n")
 
     
 
@@ -135,8 +135,6 @@ class NavNode(Node):
         goal = [goal_request.goal_x,goal_request.goal_y]
         min_distance = 10000
         closest_obs = [0,0]
-        
-
 
         for obstacle in self.obs_space_world_frame:
             distance = math.dist(goal,obstacle)
