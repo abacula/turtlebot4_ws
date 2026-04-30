@@ -133,8 +133,10 @@ class NavNode(Node):
             i+=1
 
         with open("/home/alexandra.bacula/turtlebot4_ws/obs_loc.csv", "w") as f:
+            n = 0
             for obs in self.obs_space_world_frame:
-                f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "\n")
+                f.write(str(round(obs[0],3)) + "," + str(round(obs[1],3)) + "," + str(round(self.obs_dist[n],3))+ "\n")
+                n += 1
 
     
     # Goal callback
@@ -168,9 +170,6 @@ class NavNode(Node):
 
         result = RobotGoal.Result()
         feedback = RobotGoal.Feedback()
-
-        # Base speeds
-        rotation_speed = 0.25
        
         # Get initial distance
         err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
