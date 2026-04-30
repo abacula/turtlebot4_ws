@@ -28,7 +28,7 @@ def update(frame):
             y.append(float(row[1]))
 
     ax.clear()  # clearing the axes
-    ax.scatter(x,y, s = y, c = 'b', alpha = 0.5)  # creating new scatter chart with updated data
+    ax.scatter(x,y, c = 'b', alpha = 0.5)  # creating new scatter chart with updated data
     ax.scatter(x_rob,y_rob, c = 'r', alpha = 0.5)  # creating new scatter chart with updated data
     fig.canvas.draw()  # forcing the artist to redraw itself
 
