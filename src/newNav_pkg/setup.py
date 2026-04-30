@@ -26,7 +26,8 @@ setup(
         'console_scripts': [
             "get_obs=newNav_pkg.get_obstacles:main",
             "go_to_goal=newNav_pkg.nav:main",
-            "goal_client=newNav_pkg.goal_client:main"
+            "goal_client=newNav_pkg.goal_client:main",
+            "pf_nav=newNav_pkg.nav_pf:main"
         ],
     },
 )
