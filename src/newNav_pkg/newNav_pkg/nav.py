@@ -102,9 +102,12 @@ class NavNode(Node):
         else:
             self.ang = ang
 
+        x += self.x_offset
+        y += self.y_offset
+
         # Transform
-        self.x = x*math.cos(self.ang_offset) - y*math.sin(self.ang_offset) + self.x_offset
-        self.y = x*math.sin(self.ang_offset) + y*math.cos(self.ang_offset) + self.y_offset       
+        self.x = x*math.cos(self.ang_offset) - y*math.sin(self.ang_offset) 
+        self.y = x*math.sin(self.ang_offset) + y*math.cos(self.ang_offset)        
 
         # with open("/home/alexandra.bacula/turtlebot4_ws/loc.csv", "w") as f:
         #     f.write(str(round(self.x,3)) + "," + str(round(self.y,3)) + "\n")
