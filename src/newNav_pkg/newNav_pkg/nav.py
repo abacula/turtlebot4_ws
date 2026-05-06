@@ -96,14 +96,13 @@ class NavNode(Node):
             self.got_offset = True
 
         ang += self.ang_offset
+        x += self.x_offset
+        y += self.y_offset
         
         if ang < -self.PI:
             self.ang = ang + (2*self.PI)
         else:
             self.ang = ang
-
-        x += self.x_offset
-        y += self.y_offset
 
         # Transform
         self.x = x*math.cos(self.ang_offset) - y*math.sin(self.ang_offset) 

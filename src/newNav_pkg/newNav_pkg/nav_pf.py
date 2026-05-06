@@ -99,6 +99,8 @@ class NavPFNode(Node):
             self.got_offset = True
 
         ang += self.ang_offset
+        x += self.x_offset
+        y += self.y_offset
         
         if ang < -self.PI:
             self.ang = ang + (2*self.PI)
@@ -106,8 +108,8 @@ class NavPFNode(Node):
             self.ang = ang
 
         # Transform
-        self.x = x*math.cos(self.ang_offset) - y*math.sin(self.ang_offset) + self.x_offset
-        self.y = x*math.sin(self.ang_offset) + y*math.cos(self.ang_offset) + self.y_offset
+        self.x = x*math.cos(self.ang_offset) - y*math.sin(self.ang_offset) 
+        self.y = x*math.sin(self.ang_offset) + y*math.cos(self.ang_offset) 
 
         test = String()
         test.data = "Current position x: " + str(round(self.x,2)) + " y: " + str(round(self.y,2)) + " ang: " + str(round(self.ang,4)) + "\n"
