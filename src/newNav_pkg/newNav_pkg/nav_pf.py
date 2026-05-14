@@ -49,6 +49,15 @@ class NavPFNode(Node):
         self.ang_threshold = 0.06
         self.goal_threshold = 0.1
 
+
+        self.kpl = 0.4
+        self.kdl = 0.2
+        self.kil = 0
+
+        self.kpa = 0.1
+        self.kda = 0.02
+        self.kia = 0.0
+
         # When we care about obs for potential fields
         self.obs_threshold = 0.8
 
@@ -159,7 +168,7 @@ class NavPFNode(Node):
 
     def get_att_f(self, d_goal, goal_x, goal_y):
         k_att = 1.0
-        att_mag = 0.5 * k_att * d_goal
+        att_mag = 0.5 * k_att * d_goal**2
         att_ang = math.atan2(goal_y - self.y, goal_x - self.x)
         f_att_x = att_mag * math.cos(att_ang)
         f_att_y = att_mag * math.sin(att_ang)
@@ -168,17 +177,17 @@ class NavPFNode(Node):
 
     def get_rep_f(self):
         k_rep = 0.8
-        numObs = len(self.obs_space_world_frame)
+        numObs = len(self.obs_space_rob_frame)
         f_rep_x = 0
         f_rep_y = 0
         for n in range(numObs):
             d_obs = self.obs_dist[n]
-            [x_obs, y_obs] = self.obs_space_world_frame[n]
+            [x_obs, y_obs] = self.obs_space_rob_frame[n]
            
 
             if d_obs < self.obs_threshold:
                 rep_mag = 0.5 * k_rep * ((1/d_obs) - (1/self.obs_threshold))**2
-                rep_ang = math.atan2(self.y - y_obs, self.x - x_obs)
+                rep_ang = math.atan2(-y_obs, -x_obs)
 
                 f_rep_x += rep_mag * math.cos(rep_ang)
                 f_rep_y += rep_mag * math.sin(rep_ang)
@@ -186,27 +195,17 @@ class NavPFNode(Node):
         return f_rep_x, f_rep_y
 
     def pid_to_point(self, goal_x, goal_y):
-        # For PID
+
         err_pos_prev = 0
         err_ang_prev = 0
-        err_pos_sum = 0
-        err_ang_sum = 0
         vel_ang_prev = 0.1
 
-        kpl = 0.4
-        kdl = 0.2
-        kil = 0
-
-        kpa = 0.1
-        kda = 0.02
-        kia = 0.0
-
-        # Calc new errs
+        i = 0
+      
+       # Calc new errs
         err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
 
-        i = 0
-
-        while abs(err_pos) > self.pos_threshold:
+        while (abs(err_pos) < self.pos_threshold):
             self.get_logger().info("goal: " + str(goal_x) + ", " + str(goal_y) + "| err: " + str(err_pos))
             
             if i > self.max_iteration:
@@ -231,15 +230,15 @@ class NavPFNode(Node):
             if abs(err_ang) > self.ang_threshold:
                 # If at the -pi to pi boundary just keep prior vel until past that point
                 if abs(err_ang) > self.PI:
-                    vel_ang = vel_ang_prev
+                    vel_ang = self.vel_ang_prev
                 else:
-                    vel_ang = kpa*err_ang + kda*(err_ang - err_ang_prev) + kia*err_ang_sum
+                    vel_ang = self.kpa*err_ang + self.kda*(err_ang - self.err_ang_prev) + self.kia*self.err_ang_sum
             else:
-                vel_lin = kpl*err_pos + kdl*(err_pos - err_pos_prev) + kil*err_pos_sum
+                vel_lin = self.kpl*err_pos + self.kdl*(err_pos - err_pos_prev) + self.kil*self.err_pos_sum
 
             vel.linear.x = vel_lin
             vel.angular.z = vel_ang
-  
+
             # Publish velocity
             self.velocity_pub.publish(vel)
 
@@ -251,6 +250,7 @@ class NavPFNode(Node):
             # Calc new errs
             err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
             i += 1
+     
 
     
     def execute_callback(self, goal_handle):
@@ -268,7 +268,7 @@ class NavPFNode(Node):
         iteration = 0
 
         # timestep for pf
-        timestep = 1.0
+        timestep = 0.2
 
         # While not close enough
         while err_pos > self.pos_threshold:
@@ -300,6 +300,12 @@ class NavPFNode(Node):
             gx = self.x + dx
             gy = self.y + dy
 
+            if (abs(gx - goal_x) < self.pos_threshold):
+                gx = goal_x
+
+            if (abs(gy - goal_y) < self.pos_threshold):
+                gy = goal_y
+
             self.pid_to_point(gx,gy)
 
             # Publish feedback
@@ -320,7 +326,7 @@ class NavPFNode(Node):
             vel = Twist()
             vel.linear.x = 0.0
             # Rotate
-            vel.angular.z = kpa*err_ang + kda*(err_ang - err_ang_prev) + kia*err_ang_sum
+            vel.angular.z = self.kpa*err_ang 
             # Publish 
             self.velocity_pub.publish(vel)
 
