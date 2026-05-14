@@ -45,7 +45,8 @@ class NavPFNode(Node):
         self.robot_radius = 0.3
 
         # Threshold of close enough
-        self.pos_threshold = 0.02
+        self.pid_pos_threshold = 0.02
+        self.pos_threshold = 0.1
         self.ang_threshold = 0.06
         self.goal_threshold = 0.1
 
@@ -205,7 +206,7 @@ class NavPFNode(Node):
        # Calc new errs
         err_pos = math.dist([goal_x,goal_y],[self.x,self.y])
 
-        while (abs(err_pos) < self.pos_threshold):
+        while (abs(err_pos) < self.pid_pos_threshold):
             self.get_logger().info("goal: " + str(goal_x) + ", " + str(goal_y) + "| err: " + str(err_pos))
             
             if i > self.max_iteration:
